@@ -1,3 +1,9 @@
+import { config } from "dotenv";
+import { resolve } from "path";
+
+// Load .env.local before anything else — tsx doesn't do this automatically
+config({ path: resolve(process.cwd(), ".env.local") });
+
 import mongoose from "mongoose";
 import { Question } from "../models/Question";
 
