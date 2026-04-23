@@ -1,58 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import questions from "@/data/questions.json";
 import PageShell from "@/components/PageShell";
 import ProgressBar from "@/components/ProgressBar";
 import OptionButton from "@/components/OptionButton";
 import Button from "@/components/Button";
 
+type Question = {
+  _id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  category: string;
+  difficulty: string;
+};
+
+type Answer = {
+  questionId: string;
+  selectedIndex: number;
+  correct: boolean;
+};
+
 export default function QuizPage() {
   const router = useRouter();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
-  const [fading, setFading] = useState(false);
 
-  if (!questions.length) {
+  const [questions, setQuestions]       = useState<Question[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [answers, setAnswers]           = useState<Answer[]>([]);
+  const [fading, setFading]             = useState(false);
+  const [submitting, setSubmitting]     = useState(false);
+
+  // Stable session ID for the lifetime of this quiz attempt
+  const [sessionId] = useState(() => crypto.randomUUID());
+
+  useEffect(() => {
+    fetch("/api/questions")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        setQuestions(data);
+      })
+      .catch((err) => setError(err.message ?? "Failed to load questions."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
     return (
       <PageShell>
-        <p className="text-gray-400 dark:text-slate-500">No questions available.</p>
+        <p className="text-gray-400 dark:text-slate-500 animate-pulse">Loading questions…</p>
+      </PageShell>
+    );
+  }
+
+  if (error || !questions.length) {
+    return (
+      <PageShell>
+        <div className="text-center space-y-4">
+          <p className="text-gray-500 dark:text-slate-400">{error ?? "No questions available."}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
       </PageShell>
     );
   }
 
   const question = questions[currentIndex];
-  const isLast = currentIndex === questions.length - 1;
+  const isLast   = currentIndex === questions.length - 1;
 
-  if (!question) {
-    return (
-      <PageShell>
-        <p className="text-gray-400 dark:text-slate-500">
-          Something went wrong.{" "}
-          <a href="/quiz" className="underline">Restart</a>
-        </p>
-      </PageShell>
-    );
-  }
+  async function handleNext() {
+    if (selectedIndex === null || fading || submitting) return;
 
-  function handleNext() {
-    if (!selectedAnswer || fading) return;
-
-    const updated = [...selectedAnswers, selectedAnswer];
+    const answer: Answer = {
+      questionId:    question._id,
+      selectedIndex,
+      correct:       selectedIndex === question.correctIndex,
+    };
+    const updatedAnswers = [...answers, answer];
 
     if (isLast) {
-      router.push(`/result?answers=${encodeURIComponent(JSON.stringify(updated))}`);
+      setSubmitting(true);
+      const score = updatedAnswers.filter((a) => a.correct).length;
+
+      // Save response — navigate even if this fails
+      try {
+        await fetch("/api/responses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            score,
+            total: questions.length,
+            answers: updatedAnswers,
+          }),
+        });
+      } catch {
+        // non-critical
+      }
+
+      router.push(`/result?score=${score}&total=${questions.length}`);
       return;
     }
 
     // Fade out → swap question → fade in
     setFading(true);
     setTimeout(() => {
-      setSelectedAnswers(updated);
+      setAnswers(updatedAnswers);
       setCurrentIndex((i) => i + 1);
-      setSelectedAnswer(null);
+      setSelectedIndex(null);
       setFading(false);
     }, 200);
   }
@@ -69,24 +126,36 @@ export default function QuizPage() {
           dark:bg-[#1c1928] dark:border-[#2e2b40] dark:shadow-none
           ${fading ? "opacity-0" : "opacity-100"}`}
         >
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-500 dark:bg-indigo-950/50 dark:text-indigo-400 capitalize">
+              {question.category}
+            </span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-500 capitalize">
+              {question.difficulty}
+            </span>
+          </div>
+
           <h2 className="text-xl font-semibold leading-snug text-gray-900 dark:text-slate-100">
             {question.question}
           </h2>
 
           <div className="space-y-3">
-            {question.options.map((option) => (
+            {question.options.map((option, idx) => (
               <OptionButton
-                key={option}
+                key={idx}
                 option={option}
-                selected={selectedAnswer === option}
-                onClick={() => setSelectedAnswer(option)}
+                selected={selectedIndex === idx}
+                onClick={() => setSelectedIndex(idx)}
               />
             ))}
           </div>
         </div>
 
-        <Button onClick={handleNext} disabled={!selectedAnswer || fading}>
-          {isLast ? "See My Results" : "Next"}
+        <Button
+          onClick={handleNext}
+          disabled={selectedIndex === null || fading || submitting}
+        >
+          {submitting ? "Saving…" : isLast ? "See My Results" : "Next"}
         </Button>
 
       </div>
