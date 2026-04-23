@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: darkScript }} />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#faf8f5] text-gray-900 dark:bg-[#0f0e1a] dark:text-slate-100 transition-colors duration-300">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col bg-[#faf8f5] text-gray-900 dark:bg-[#0f0e1a] dark:text-slate-100 transition-colors duration-300">
         <ThemeToggle />
         {children}
       </body>
