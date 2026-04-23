@@ -22,11 +22,8 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="space-y-3 pt-2">
+        <div className="pt-2">
           <Button href="/quiz">Start Quiz</Button>
-          <p className="text-sm text-gray-400 dark:text-slate-500">
-            5 quick questions · No sign-up
-          </p>
         </div>
 
       </div>

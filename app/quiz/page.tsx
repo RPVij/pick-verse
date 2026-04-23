@@ -84,7 +84,17 @@ export default function QuizPage() {
       setSubmitting(true);
       const score = updatedAnswers.filter((a) => a.correct).length;
 
-      // Save response — navigate even if this fails
+      // Persist full quiz data so the result page can show the breakdown
+      try {
+        localStorage.setItem(
+          "pickverse_result",
+          JSON.stringify({ questions, answers: updatedAnswers })
+        );
+      } catch {
+        // non-critical
+      }
+
+      // Save response to DB — navigate even if this fails
       try {
         await fetch("/api/responses", {
           method: "POST",
