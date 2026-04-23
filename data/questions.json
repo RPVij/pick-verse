@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "question": "How often do you wash your face?",
+    "options": ["Once a day", "Twice a day", "Only when I shower"]
+  },
+  {
+    "id": 2,
+    "question": "Which best describes your skin type?",
+    "options": ["Oily", "Dry", "Combination"]
+  },
+  {
+    "id": 3,
+    "question": "Do you apply sunscreen daily?",
+    "options": ["Yes, every morning", "Only on sunny days", "Rarely or never"]
+  },
+  {
+    "id": 4,
+    "question": "How much water do you drink per day?",
+    "options": ["Less than 4 glasses", "4–6 glasses", "7 or more glasses"]
+  },
+  {
+    "id": 5,
+    "question": "What is your biggest skincare concern?",
+    "options": ["Acne & breakouts", "Dryness & dullness", "Aging & fine lines"]
+  }
+]
