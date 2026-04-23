@@ -66,20 +66,20 @@ function ResultContent() {
     <div className="w-full max-w-2xl space-y-6">
 
       {/* Score card */}
-      <div className="rounded-3xl border-2 p-8 text-center space-y-4
+      <div className="rounded-3xl border-2 p-6 sm:p-8 text-center space-y-4
         bg-indigo-50 border-indigo-100
         dark:bg-indigo-950/40 dark:border-indigo-900/50">
-        <div className="text-6xl">{getEmoji(pct)}</div>
+        <div className="text-5xl sm:text-6xl">{getEmoji(pct)}</div>
         <div className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
             Your Score
           </p>
-          <p className="text-6xl font-bold text-gray-900 dark:text-slate-100">
-            {score}<span className="text-3xl text-gray-400 dark:text-slate-500">/{total}</span>
+          <p className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-slate-100">
+            {score}<span className="text-2xl sm:text-3xl text-gray-400 dark:text-slate-500">/{total}</span>
           </p>
           <p className="text-indigo-500 dark:text-indigo-400 font-medium">{pct}% correct</p>
         </div>
-        <p className="text-gray-600 dark:text-slate-400 text-base">{getMessage(pct)}</p>
+        <p className="text-gray-600 dark:text-slate-400 text-sm sm:text-base">{getMessage(pct)}</p>
       </div>
 
       {/* Answer breakdown */}
@@ -97,7 +97,7 @@ function ResultContent() {
             return (
               <div
                 key={question._id}
-                className={`rounded-2xl border p-5 space-y-3
+                className={`rounded-2xl border p-4 sm:p-5 space-y-3
                   ${correct
                     ? "bg-emerald-50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/40"
                     : "bg-red-50 border-red-100 dark:bg-red-950/30 dark:border-red-900/40"

@@ -12,13 +12,11 @@ export const metadata: Metadata = {
 };
 
 // Runs before React hydrates to avoid flash of wrong theme.
-// Priority: localStorage saved preference → system preference.
+// Default is light mode — only switch to dark if user manually chose it via the toggle.
 const darkScript = `
   (function() {
     try {
-      var stored = localStorage.getItem('theme');
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (stored === 'dark' || (!stored && prefersDark)) {
+      if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
       }
     } catch(e) {}
